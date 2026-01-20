@@ -6,6 +6,7 @@ An intelligent video processing pipeline that automates content creation workflo
 
 - 🎙️ **Text-to-Speech**: Convert scripts to voiceover using ElevenLabs API with word-level timestamps
 - 📝 **Auto-Captions**: Generate SRT subtitles from TTS alignment data
+- 🌍 **Localization**: Dub voiceovers to 32+ languages preserving speaker tone
 - 🎬 **Video Assembly**: Combine hook, body, and packshot clips with crossfade transitions
 - 🔊 **Voiceover Overlay**: Apply voiceover audio to assembled videos
 - 📺 **Subtitle Burning**: Burn captions directly into video with customizable styles
@@ -54,6 +55,7 @@ ffmpeg_agent/
 ├── execution/           # Deterministic Python scripts
 │   ├── text_to_speech.py
 │   ├── transcribe_audio.py
+│   ├── dub_voiceover.py    # NEW: Localization
 │   ├── assemble_video.py
 │   ├── apply_voiceover.py
 │   ├── add_subtitles.py
@@ -62,6 +64,7 @@ ffmpeg_agent/
 ├── directives/          # SOPs for AI orchestration
 ├── input/               # Source files (gitignored)
 │   ├── text/           # Script files for TTS
+│   ├── voiceovers/     # Source audio for dubbing
 │   ├── videos/         # Video clips (hook/, body/, packshot/)
 │   └── music/          # Background music tracks
 ├── output/              # Generated files (gitignored)
@@ -88,7 +91,17 @@ python execution/transcribe_audio.py \
 ```
 Creates SRT subtitles from ElevenLabs timing data with ~20 char line segments.
 
-### 3. Assemble Video
+### 3. Dub Voiceover (Localization)
+```bash
+python execution/dub_voiceover.py \
+  --input input/voiceovers/audio_en.mp3 \
+  --output output/dubbed \
+  --source_lang en \
+  --target_lang es
+```
+Translates voiceover to target language using ElevenLabs Dubbing API. Supports 32+ languages including: `es`, `fr`, `de`, `it`, `pt`, `pl`, `hi`, `ja`, `ko`, `zh`.
+
+### 4. Assemble Video
 ```bash
 python execution/assemble_video.py \
   --hook_dir input/videos/hook \
@@ -98,7 +111,7 @@ python execution/assemble_video.py \
 ```
 Generates all combinations with 0.5s crossfade between body and packshot.
 
-### 4. Apply Voiceover
+### 5. Apply Voiceover
 ```bash
 python execution/apply_voiceover.py \
   --video input.mp4 \
@@ -107,7 +120,7 @@ python execution/apply_voiceover.py \
 ```
 Replaces video audio with voiceover, preserving full video duration.
 
-### 5. Add Subtitles
+### 6. Add Subtitles
 ```bash
 python execution/add_subtitles.py \
   --input output/voiceover \
@@ -117,7 +130,7 @@ python execution/add_subtitles.py \
 ```
 Available styles: `clean_white`, `highlight_yellow`, `bold_red`
 
-### 6. Add Music
+### 7. Add Music
 ```bash
 python execution/add_music.py \
   --input output/captioned \
@@ -126,7 +139,7 @@ python execution/add_music.py \
 ```
 Mixes music at 20% volume under voiceover. Generates all video × music combinations.
 
-### 7. Resize to 1:1
+### 8. Resize to 1:1
 ```bash
 python execution/resize_video_1x1.py \
   --input output/with_music \
