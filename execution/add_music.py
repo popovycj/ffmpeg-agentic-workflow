@@ -54,17 +54,20 @@ def add_music(input_dir, music_dir, output_dir):
 
             print(f"Processing: {video_path.name} + {music_path.name} -> {output_filename}")
 
+            # Mix video audio with music at reduced volume (20%) to preserve voiceover
+            filter_complex = "[0:a][1:a]amix=inputs=2:duration=first:weights=1 0.2[aout]"
+
             cmd = [
                 'ffmpeg',
                 '-y',
                 '-i', str(video_path),
                 '-i', str(music_path),
+                '-filter_complex', filter_complex,
                 '-map', '0:v',
-                '-map', '1:a',
+                '-map', '[aout]',
                 '-c:v', 'copy',
                 '-c:a', 'aac',    # Force AAC encoding for compatibility
                 '-b:a', '192k',   # High quality audio
-                '-shortest',      # Crop to shortest stream
                 str(output_file_path)
             ]
 
